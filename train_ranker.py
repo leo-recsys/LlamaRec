@@ -65,6 +65,7 @@ def main(args, export_root=None):
 
 
 if __name__ == "__main__":
+    args = parser.parse_args()
     args.model_code = 'llm'
     set_template(args)
     main(args, export_root=None)

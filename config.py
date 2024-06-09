@@ -148,6 +148,3 @@ parser.add_argument('--lora_lr', type=float, default=1e-4)
 parser.add_argument('--lora_micro_batch_size', type=int, default=16)
 
 ################
-
-
-args = parser.parse_args()
