@@ -81,6 +81,7 @@ class LLMTrainer(Trainer):
             tokenizer,
             export_root,
             use_wandb,
+            hf_args=None,
             **kwargs
         ):
         self.original_args = args
@@ -96,29 +97,31 @@ class LLMTrainer(Trainer):
             label_words={i: chr(ord('A')+i) for i in range(args.llm_negative_sample_size+1)},
         )
 
-        hf_args = TrainingArguments(
-            per_device_train_batch_size=args.lora_micro_batch_size,
-            gradient_accumulation_steps=args.train_batch_size//args.lora_micro_batch_size,
-            warmup_steps=args.warmup_steps,
-            num_train_epochs=args.lora_num_epochs,
-            learning_rate=args.lora_lr,
-            bf16=True,
-            logging_steps=10,
-            optim="paged_adamw_32bit",
-            evaluation_strategy="steps",
-            save_strategy="steps",
-            eval_steps=args.lora_val_iterations,
-            save_steps=args.lora_val_iterations,
-            output_dir=export_root,
-            save_total_limit=3,
-            load_best_model_at_end=True,
-            ddp_find_unused_parameters=None,
-            group_by_length=False,
-            report_to="wandb" if use_wandb else None,
-            run_name=args.model_code+'_'+args.dataset_code if use_wandb else None,
-            metric_for_best_model=args.rerank_best_metric,
-            greater_is_better=True,
-        )
+        if hf_args is None:
+            hf_args = TrainingArguments(
+                per_device_train_batch_size=args.lora_micro_batch_size,
+                gradient_accumulation_steps=args.train_batch_size//args.lora_micro_batch_size,
+                warmup_steps=args.warmup_steps,
+                num_train_epochs=args.lora_num_epochs,
+                learning_rate=args.lora_lr,
+                bf16=True,
+                logging_steps=10,
+                optim="paged_adamw_32bit",
+                evaluation_strategy="steps",
+                save_strategy="steps",
+                eval_steps=args.lora_val_iterations,
+                save_steps=args.lora_val_iterations,
+                output_dir=export_root,
+                save_total_limit=3,
+                load_best_model_at_end=True,
+                ddp_find_unused_parameters=None,
+                group_by_length=False,
+                report_to="wandb" if use_wandb else None,
+                run_name=args.model_code+'_'+args.dataset_code if use_wandb else None,
+                metric_for_best_model=args.rerank_best_metric,
+                greater_is_better=True,
+            )
+
         super().__init__(
             model=model,
             args=hf_args,
